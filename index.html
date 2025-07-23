@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Architecture Diagram</title>
+    <style>
+        /* Google Font for a clean look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+
+        /* Basic Setup */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7fa; /* Lighter gray background */
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top */
+            padding: 50px;
+            color: #333;
+            min-height: 100vh;
+        }
+
+        /* Main container for the diagram */
+        .diagram-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr); /* Three-column layout */
+            gap: 80px; /* Increased space between sections */
+            position: relative;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Styling for the main sections (User, Base Station, Cloud) */
+        .section {
+            background-color: #ffffff;
+            border: 1px solid #e0e0e0;
+            border-radius: 16px; /* Softer corners */
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin: 0 0 25px 0;
+            color: #1a253c;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        /* Layout for components inside each section */
+        .component-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Space between components */
+            align-items: center;
+        }
+
+        /* Individual component card styling */
+        .card {
+            display: flex;
+            align-items: center;
+            background-color: #fcfdff;
+            border: 1px solid #dbe9ff;
+            border-radius: 10px;
+            padding: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        .card-icon {
+            width: 40px;
+            height: 40px;
+            margin-right: 15px;
+            flex-shrink: 0; /* Prevent icon from shrinking */
+        }
+
+        .card-content {
+            text-align: left;
+        }
+
+        .card-content h3 {
+            font-size: 0.95rem;
+            font-weight: 500;
+            margin: 0;
+        }
+        
+        .card-content p {
+            font-size: 0.8rem;
+            margin: 4px 0 0 0;
+            color: #667;
+        }
+
+        /* SVG layer for drawing connector lines */
+        .connector-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Allows clicking through the SVG */
+            z-index: 0;
+        }
+        
+        .connector-svg text {
+            font-size: 13px;
+            fill: #d90429; /* Red for ACK */
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .connector-line {
+            stroke: #3d5a80;
+            stroke-width: 2;
+        }
+        
+        .ack-line {
+             stroke: #d90429;
+             stroke-width: 2;
+             fill: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="diagram-container">
+        <!-- SVG Layer for drawing connecting lines -->
+        <svg class="connector-svg">
+            <defs>
+                <!-- Arrowhead for main data flow -->
+                <marker id="arrowhead-main" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#3d5a80" />
+                </marker>
+                <!-- Arrowhead for acknowledgement flow -->
+                 <marker id="arrowhead-ack" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                    <polygon points="0 0, 8 3, 0 6" fill="#d90429" />
+                </marker>
+            </defs>
+            
+            <!-- Connectors -->
+            <line id="line-buttons-esp" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-esptx-loratx" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-loratx-lorarx" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-lorarx-esprx" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-esprx-oled" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-esprx-wifi" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-wifi-firebase" class="connector-line" marker-end="url(#arrowhead-main)" />
+            <line id="line-firebase-flutter" class="connector-line" marker-end="url(#arrowhead-main)" />
+
+            <!-- ACK Lines -->
+            <path id="line-esprx-loratx" class="ack-line" marker-end="url(#arrowhead-ack)" />
+            <text id="text-ack1">ACK</text>
+            <path id="line-loratx-esptx" class="ack-line" marker-end="url(#arrowhead-ack)" />
+            <text id="text-ack2">ACK</text>
+            <line id="line-esptx-led" class="ack-line" marker-end="url(#arrowhead-main)" />
+
+        </svg>
+
+        <!-- SECTION 1: USER SIDE -->
+        <div class="section user-side">
+            <h2 class="section-title">User Side: Wearable Transmitter</h2>
+            <div class="component-group">
+                <div class="card" id="buttons">
+                    <img class="card-icon" src="https://api.iconify.design/material-symbols/radio-button-checked.svg" alt="Button Icon">
+                    <div class="card-content">
+                        <h3>Push Buttons</h3>
+                        <p>Sanitary, Maternity, Emergency</p>
+                    </div>
+                </div>
+                <div class="card" id="esp-tx">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/chip.svg" alt="Chip Icon">
+                    <div class="card-content">
+                        <h3>ESP32 (Transmitter)</h3>
+                        <p>Processes button input</p>
+                    </div>
+                </div>
+                <div class="card" id="lora-tx">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/radio-tower.svg" alt="Radio Icon">
+                     <div class="card-content">
+                        <h3>LoRa RFM95 (TX)</h3>
+                        <p>Sends signal wirelessly</p>
+                    </div>
+                </div>
+                <div class="card" id="led">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/led-on.svg" alt="LED Icon">
+                     <div class="card-content">
+                        <h3>Status LED</h3>
+                        <p>Blinks for acknowledgement</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 2: VOLUNTEER SIDE -->
+        <div class="section base-station">
+            <h2 class="section-title">Volunteer Side: Base Station</h2>
+             <div class="component-group">
+                <div class="card" id="lora-rx">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/radio-tower.svg" alt="Radio Icon">
+                     <div class="card-content">
+                        <h3>LoRa RFM95 (RX)</h3>
+                        <p>Receives LoRa signal</p>
+                    </div>
+                </div>
+                <div class="card" id="esp-rx">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/chip.svg" alt="Chip Icon">
+                     <div class="card-content">
+                        <h3>ESP32 (Receiver)</h3>
+                        <p>Processes received data</p>
+                    </div>
+                </div>
+                 <div class="card" id="oled">
+                    <img class="card-icon" src="https://api.iconify.design/material-symbols/display-settings-outline.svg" alt="Display Icon">
+                     <div class="card-content">
+                        <h3>OLED Display</h3>
+                        <p>Offline notification fallback</p>
+                    </div>
+                </div>
+                <div class="card" id="wifi">
+                    <img class="card-icon" src="https://api.iconify.design/mdi/wifi.svg" alt="WiFi Icon">
+                     <div class="card-content">
+                        <h3>WiFi Module</h3>
+                        <p>Connects to the internet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 3: CLOUD SERVICES -->
+        <div class="section cloud-services">
+            <h2 class="section-title">Cloud Services</h2>
+             <div class="component-group">
+                <div class="card" id="firebase">
+                    <img class="card-icon" src="https://api.iconify.design/logos/firebase.svg" alt="Firebase Logo">
+                     <div class="card-content">
+                        <h3>Firebase Realtime DB</h3>
+                        <p>Stores request data in the cloud</p>
+                    </div>
+                </div>
+                <div class="card" id="flutter-app">
+                    <img class="card-icon" src="https://api.iconify.design/logos/flutter.svg" alt="Flutter Logo">
+                     <div class="card-content">
+                        <h3>Flutter Web Dashboard</h3>
+                        <p>Displays requests to volunteers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // This script dynamically draws the connector lines based on component positions.
+        // This makes the diagram more robust to changes in CSS or content.
+        document.addEventListener('DOMContentLoaded', () => {
+            function getElementCenter(id) {
+                const el = document.getElementById(id);
+                const rect = el.getBoundingClientRect();
+                const containerRect = document.querySelector('.diagram-container').getBoundingClientRect();
+                return {
+                    x: rect.left + rect.width / 2 - containerRect.left,
+                    y: rect.top + rect.height / 2 - containerRect.top
+                };
+            }
+
+            function drawLine(lineId, startId, endId, isVertical = true) {
+                const line = document.getElementById(lineId);
+                const start = getElementCenter(startId);
+                const end = getElementCenter(endId);
+                if (isVertical) {
+                    line.setAttribute('x1', start.x);
+                    line.setAttribute('y1', start.y + 40); // Move below card
+                    line.setAttribute('x2', end.x);
+                    line.setAttribute('y2', end.y - 40); // Move above card
+                } else {
+                    line.setAttribute('x1', start.x + 150); // Move right of card
+                    line.setAttribute('y1', start.y);
+                    line.setAttribute('x2', end.x - 150); // Move left of card
+                    line.setAttribute('y2', end.y);
+                }
+            }
+            
+            function drawCurvedLine(lineId, startId, endId, textId) {
+                const line = document.getElementById(lineId);
+                const text = document.getElementById(textId);
+                const start = getElementCenter(startId);
+                const end = getElementCenter(endId);
+                
+                const startX = start.x - 150;
+                const startY = start.y;
+                const endX = end.x + 150;
+                const endY = end.y;
+                
+                const controlX1 = startX - 100;
+                const controlY1 = startY;
+                const controlX2 = endX + 100;
+                const controlY2 = endY;
+
+                const path = `M ${startX} ${startY} C ${controlX1} ${controlY1}, ${controlX2} ${controlY2}, ${endX} ${endY}`;
+                line.setAttribute('d', path);
+                
+                if (text) {
+                    text.setAttribute('x', (startX + endX) / 2 - 80);
+                    text.setAttribute('y', startY + 20);
+                }
+            }
+
+            // Draw all the lines
+            drawLine('line-buttons-esp', 'buttons', 'esp-tx');
+            drawLine('line-esptx-loratx', 'esp-tx', 'lora-tx');
+            drawLine('line-loratx-lorarx', 'lora-tx', 'lora-rx', false);
+            drawLine('line-lorarx-esprx', 'lora-rx', 'esp-rx');
+            drawLine('line-esprx-oled', 'esp-rx', 'oled');
+            drawLine('line-esprx-wifi', 'esp-rx', 'wifi');
+            drawLine('line-wifi-firebase', 'wifi', 'firebase', false);
+            drawLine('line-firebase-flutter', 'firebase', 'flutter-app');
+            
+            // Draw ACK lines
+            drawCurvedLine('line-esprx-loratx', 'esp-rx', 'lora-tx', 'text-ack1');
+            drawCurvedLine('line-loratx-esptx', 'lora-tx', 'esp-tx', 'text-ack2');
+
+            // Draw final ACK to LED
+            const espTxPos = getElementCenter('esp-tx');
+            const ledPos = getElementCenter('led');
+            const lineEspLed = document.getElementById('line-esptx-led');
+            lineEspLed.setAttribute('x1', espTxPos.x);
+            lineEspLed.setAttribute('y1', espTxPos.y + 40);
+            lineEspLed.setAttribute('x2', ledPos.x);
+            lineEspLed.setAttribute('y2', ledPos.y - 40);
+        });
+    </script>
+</body>
+</html>
